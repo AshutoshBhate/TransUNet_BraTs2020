@@ -2,7 +2,7 @@
 
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.13+-ee4c2c.svg)](https://pytorch.org/get-started/locally/)
 
-![TransUNet Segmentation Example](images/segmentation_example.png)  <!-- Add example images if available -->
+![TransUNet Segmentation Example](images/Segmentation_Example.png)  <!-- Add example images if available -->
 
 State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN architecture, achieving **86.95% mean Dice score** on BraTS 2020 validation data.
 
