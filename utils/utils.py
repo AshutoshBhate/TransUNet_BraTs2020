@@ -357,3 +357,40 @@ def visualize_predictions(model, dataset, device, num_samples: int = 5, num_clas
     # plt.savefig("predictions_visualization.png")
     # print("Prediction visualization saved to predictions_visualization.png")
     plt.show()
+    
+    
+def evaluate_with_torchmetrics(model, loader, device):
+    model.eval()
+    metrics = {
+        'dice_et': 0.0,
+        'dice_tc': 0.0,
+        'dice_wt': 0.0,
+        'iou_et': 0.0,
+        'iou_tc': 0.0,
+        'iou_wt': 0.0
+    }
+    counts = {'total': 0}
+    
+    with torch.no_grad():
+        for x, y in tqdm(loader, desc="Evaluating"):
+            x, y = x.to(device), y.to(device)
+            pred = model(x)
+            pred_masks = pred.argmax(dim=1)
+            
+            for i in range(x.size(0)):
+                dice, iou = compute_brats_metrics(pred_masks[i], y[i])
+                
+                metrics['dice_et'] += dice[0].item()
+                metrics['dice_tc'] += dice[1].item()
+                metrics['dice_wt'] += dice[2].item()
+                metrics['iou_et'] += iou[0].item()
+                metrics['iou_tc'] += iou[1].item()
+                metrics['iou_wt'] += iou[2].item()
+                counts['total'] += 1
+                
+    # Average across all samples
+    avg_metrics = {k: v / counts['total'] for k, v in metrics.items()}
+    avg_metrics['avg_dice'] = (avg_metrics['dice_et'] + avg_metrics['dice_tc'] + avg_metrics['dice_wt']) / 3
+    avg_metrics['avg_iou'] = (avg_metrics['iou_et'] + avg_metrics['iou_tc'] + avg_metrics['iou_wt']) / 3
+    
+    return avg_metrics
