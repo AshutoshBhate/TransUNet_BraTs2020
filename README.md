@@ -73,7 +73,7 @@ BraTS2020_TrainingData/
 
 ### 4. Training
 ```bash
-python train.p
+$env:KMP_DUPLICATE_LIB_OK="TRUE"; python train.py
 ```
 Configuration is managed through config/config.py:
 
