@@ -6,6 +6,7 @@ This project currently uses the PyTorch **nightly build (2.6.0+cu118)**. You can
 ``````bash
 pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu118
 ``````
+### Example of Brain Tumor Segmentation:
 
 ![TransUNet Segmentation Example](images/Segmentation_Example.png)  <!-- Add example images if available -->
 
