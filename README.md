@@ -1,7 +1,6 @@
 # TransUNet for Brain Tumor Segmentation on BraTS 2020
 
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.13+-ee4c2c.svg)](https://pytorch.org/get-started/locally/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ![TransUNet Segmentation Example](images/segmentation_example.png)  <!-- Add example images if available -->
 
