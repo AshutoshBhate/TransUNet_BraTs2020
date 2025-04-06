@@ -1,31 +1,27 @@
-# Core PyTorch + Image Processing
-torch>=1.9.0            # Match with your CUDA version (e.g., cu118)
-torchvision
-torchaudio              # Optional: include only if needed
-timm>=0.4.12            # For EfficientNet, Vision Transformer models
-einops>=0.4.1           # For tensor rearrangements (used in the model)
+#Core PyTorch Ecosystem            
+torch==2.0.1+cu118          # Core framework - match CUDA version (11.8 in this case)
+torchvision==0.15.2+cu118    # Image transformations & datasets
+timm==0.9.2                 # Pretrained models (EfficientNet-B4/ViT) - critical for architecture
+einops==0.6.1               # Tensor reshaping operations (used in Transformer blocks)
 
-# Medical Imaging
-nibabel>=3.2.0          # For reading NIfTI files (.nii/.nii.gz)
-SimpleITK>=2.1.0        # For medical image I/O
-scikit-image>=0.18.0    # For image resizing and related operations
+#Medical Imaging Processing 
+nibabel==5.1.0              # NIfTI file I/O (essential for BraTS dataset)
+SimpleITK==2.2.1            # Alternative medical image processing
+scikit-image==0.21.0        # Image resizing & preprocessing
 
-# Data Science / Utilities
-numpy>=1.19.0
-scipy>=1.6.0            # For morphological operations (e.g., erosion/dilation)
-tqdm>=4.60.0            # For progress bars
-matplotlib              # For plotting (e.g., loss curves, image previews)
-Pillow                  # For image handling
-opencv-python-headless  # Headless OpenCV for environments without a display
+#Training & Optimization 
+torchmetrics==1.0.3         # Metrics (Dice, IoU) - newer version supports medical segmentation
+torchviz==0.0.2             # Computation graph visualization (optional)
 
-# AWS S3 Access (Not used for local runs; can be omitted if not needed)
-boto3>=1.17.0
-botocore                # Auto-installed with boto3; listed here for dependency clarity
+#Data Handling & Utilities       
+numpy==1.23.5               # Array operations
+scipy==1.11.1               # Morphological operations (binary dilation/erosion)
+tqdm==4.65.0                # Progress bars
+matplotlib==3.7.1           # Visualization (training curves, sample predictions)
+Pillow==10.0.0              # Image handling
+opencv-python-headless==4.7.0.72  # Image processing (headless for server environments)
 
-# PyTorch Training Utilities
-torchmetrics>=0.6.0     # For metrics (e.g., Dice, IoU)
-
-# Optional/Advanced utilities
-torchviz                # For gradient visualization
-psutil                  # For monitoring resources (optional)
-humanize                # For formatting resource statistics (optional)
+#Optional Dependencies          
+# boto3==1.26.154           # AWS S3 access (only needed for cloud storage)
+# psutil==5.9.5             # System monitoring (optional resource tracking)
+# humanize==4.6.0           # Readable format for metrics (optional)
