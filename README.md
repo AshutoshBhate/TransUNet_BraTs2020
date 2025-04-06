@@ -1,6 +1,11 @@
 # TransUNet for Brain Tumor Segmentation on BraTS 2020
 
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0+-ee4c2c.svg)](https://pytorch.org/get-started/previous-versions/#v260)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0--nightly+cu118-ee4c2c.svg)](https://pytorch.org/get-started/locally/#start-locally)
+
+This project currently uses the PyTorch **nightly build (2.6.0+cu118)**. You can install it via:
+``````bash
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu118
+``````
 
 ![TransUNet Segmentation Example](images/Segmentation_Example.png)  <!-- Add example images if available -->
 
