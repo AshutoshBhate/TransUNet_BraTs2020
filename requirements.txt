@@ -1,0 +1,31 @@
+# Core PyTorch + Image Processing
+torch>=1.9.0            # Match with your CUDA version (e.g., cu118)
+torchvision
+torchaudio              # Optional: include only if needed
+timm>=0.4.12            # For EfficientNet, Vision Transformer models
+einops>=0.4.1           # For tensor rearrangements (used in the model)
+
+# Medical Imaging
+nibabel>=3.2.0          # For reading NIfTI files (.nii/.nii.gz)
+SimpleITK>=2.1.0        # For medical image I/O
+scikit-image>=0.18.0    # For image resizing and related operations
+
+# Data Science / Utilities
+numpy>=1.19.0
+scipy>=1.6.0            # For morphological operations (e.g., erosion/dilation)
+tqdm>=4.60.0            # For progress bars
+matplotlib              # For plotting (e.g., loss curves, image previews)
+Pillow                  # For image handling
+opencv-python-headless  # Headless OpenCV for environments without a display
+
+# AWS S3 Access (Not used for local runs; can be omitted if not needed)
+boto3>=1.17.0
+botocore                # Auto-installed with boto3; listed here for dependency clarity
+
+# PyTorch Training Utilities
+torchmetrics>=0.6.0     # For metrics (e.g., Dice, IoU)
+
+# Optional/Advanced utilities
+torchviz                # For gradient visualization
+psutil                  # For monitoring resources (optional)
+humanize                # For formatting resource statistics (optional)
