@@ -31,7 +31,7 @@ State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN archite
 | Metric        | ET      | TC      | WT      | Mean    |
 |---------------|---------|---------|---------|---------|
 | Dice Score    | 0.8600  | 0.8935  | 0.8550  | 0.8695  |
-| IoU           | 0.8110  | 0.8432  | 0.7985  | 0.8176  |
+| IoU           | -  | -  | -  | 0.8110  |
 
 *Results on BraTS 2020 validation set (n=305 samples)*
 
