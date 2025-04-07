@@ -50,7 +50,7 @@ git clone https://github.com/yourusername/TransUNet_BraTs2020.git
 cd TransUNet_BraTs2020
 
 # Create and activate environment
-conda create -n transunet python=3.8 -y
+conda env create -f environment.yml
 conda activate transunet
 
 # Install dependencies
