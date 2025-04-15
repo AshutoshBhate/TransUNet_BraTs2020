@@ -94,15 +94,15 @@ print(f"BraTS Metrics - ET: {metrics['dice_et']:.4f} | TC: {metrics['dice_tc']:.
 
 ```mermaid
 graph TD
-    A[4-Channel MRI Input] --> B(EfficientNet-B4)
-    B --> C(Vision Transformer)
-    C --> D[Attention Decoder]
-    D --> E{{4-Class Output}}
-    style A fill:#f9f,stroke:#333
-    style B fill:#b9d,stroke:#333
-    style C fill:#9cf,stroke:#333
-    style D fill:#cf9,stroke:#333
-    style E fill:#f99,stroke:#333
+    A[4-Channel MRI Input] --> B(EfficientNet-B4)
+    B --> C(Vision Transformer)
+    C --> D[Attention Decoder]
+    D --> E{{4-Class Output}}
+    style A fill:#f9f,stroke:#333,color:#000
+    style B fill:#b9d,stroke:#333,color:#000
+    style C fill:#9cf,stroke:#333,color:#000
+    style D fill:#cf9,stroke:#333,color:#000
+    style E fill:#f99,stroke:#333,color:#000
 ```
 
 ### 7. Key Components:
