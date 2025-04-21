@@ -59,7 +59,7 @@ pip install -r requirements.txt
 
 ### 3. Dataset Setup
 Organize your BraTS 2020 data following this structure:
-
+```
 BraTS2020_TrainingData/
 └── MICCAI_BraTS2020_TrainingData/
 ├── BraTS20_Training_001/
@@ -70,6 +70,7 @@ BraTS2020_TrainingData/
 │ └── BraTS20_Training_001_seg.nii
 └── BraTS20_Training_002/
 └── ...
+```
 
 ### 4. Training
 ```bash
