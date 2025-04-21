@@ -172,8 +172,4 @@ class CompositeLoss(nn.Module):
         # Return weighted combination
         return ((1 - self.boundary_loss_weight) * region_loss 
                 + self.boundary_loss_weight * edge_loss)
-        
-
-# Example usage in training loop:
-# tversky_loss_fn = TverskyFocalLoss(alpha=0.5, beta=0.5, gamma=2.0)
-# loss_fn = CompositeLoss(tversky_loss_fn, boundary_loss_weight=0.3)
+    

@@ -29,7 +29,7 @@ def get_config() -> dict:
         'val_interval': 1,    # Run validation every N epochs
         
         # Training settings
-        'epochs': 120,
+        'epochs': 84,
         'optimizer': 'AdamW', # Supported: 'AdamW', 'SGD', etc.
         'lr': 3e-4,          # Initial learning rate
         'weight_decay': 1e-4, # L2 regularization
