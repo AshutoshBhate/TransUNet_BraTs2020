@@ -20,7 +20,7 @@ import time # To track training time
 #                    calculate_metrics, compute_brats_hd95, evaluate_with_brats_metrics etc.
 
 from config.config import get_config # Example: Function to load configuration
-from data import BrainMRIDataset_Local # Use the local dataset class
+from data.BrainMRIDataset_Class import BrainMRIDataset 
 from models.model import TransUNet # Import your model definition
 from losses.losses import CompositeLoss, TverskyFocalLoss # Import loss definitions
 from utils.utils import (
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     print("Initializing dataset...")
     # Ensure the dataset path in cfg points to your local data structure
     # Example: cfg['dataset_root'] = 'C:/Users/ashut/BrainTumorSegmentation_Project/TransUNet_BraTs2020/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData'
-    dataset = BrainMRIDataset_Local(
+    dataset = BrainMRIDataset(
         root_dir=cfg['dataset_root'], # Get root directory from config
         img_size=cfg['img_size']
         # Add other necessary dataset arguments (e.g., specific modalities)

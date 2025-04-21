@@ -23,6 +23,7 @@ def get_config() -> dict:
         'num_workers': 4,     # Number of parallel data loading processes
         
         # Data settings
+        'dataset_root': 'C:/Users/ashut/BrainTumorSegmentation_Project/TransUNet_BraTs2020/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData',
         'img_size': 160,      # Input image size (square)
         'batch_size': 8,      # Actual batch size per forward/backward pass
         'grad_accum': 4,      # Effective batch size = batch_size * grad_accum
