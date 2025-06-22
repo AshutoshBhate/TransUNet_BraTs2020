@@ -10,7 +10,7 @@ pip install --pre torch torchvision torchaudio --index-url https://download.pyto
 
 ![TransUNet Segmentation Example](images/Segmentation_Example.png)  <!-- Add example images if available -->
 
-State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN architecture, achieving **86.95% mean Dice score** on BraTS 2020 validation data.
+State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN architecture, achieving ** % Mean Dice Score** on BraTS 2020 validation data.
 
 ## Key Features
 
@@ -28,27 +28,9 @@ State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN archite
 
 ## Performance Highlights
 
-Essential Metrics:
-Dice ET: 0.8536 | TC: 0.8876 | WT: 0.8563
-Mean Dice: 0.8658, Mean IoU: 0.8079
-Val HD95 (ET/TC/WT): 2.3/2.1/3.4 mm
 
 ## Detailed BraTS Metrics
 
-| Metric     |   ET   |   TC   |   WT   |  Mean  |
-|------------|--------|--------|--------|--------|
-| Dice       | 0.8536 | 0.8876 | 0.8563 | 0.8658 |
-| IoU        | 0.7947 | 0.8444 | 0.7846 | 0.8079 |
-| HD95 (mm)  | 2.32   | 2.11   | 3.41   | 2.61   |
-| HD (mm)    | 4.22   | 3.35   | 6.71   | 4.76   |
-
-
-Performance Summary:
-• Best performing region: TC (Dice: 0.8876)
-• Most precise boundaries: TC (HD95: 2.11mm)
-• Overall Dice: 0.8658 (Target: >0.85 for clinical use)
-
-Results on BraTS 2020 validation set (n=369 samples)
 
 ## Quick Start
 
