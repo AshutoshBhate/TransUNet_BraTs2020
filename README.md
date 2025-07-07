@@ -8,7 +8,7 @@ pip install --pre torch torchvision torchaudio --index-url https://download.pyto
 ``````
 ### Example of Brain Tumor Segmentation:
 
-![TransUNet Segmentation Example](images/Segmentation_Example.png)  <!-- Add example images if available -->
+![TransUNet Segmentation Example](images/Segmentation_Output.png)  
 
 State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN architecture, achieving ** % Mean Dice Score** on BraTS 2020 validation data.
 
