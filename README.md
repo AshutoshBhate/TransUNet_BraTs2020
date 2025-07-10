@@ -26,7 +26,7 @@ The model achieves strong performance across all three tumor sub-regions, with p
 - **Advanced Training**: Implements mixed-precision training (FP16), gradient accumulation, gradient clipping, and a `CosineAnnealingWarmRestarts` learning rate scheduler.
 - **Robust Loss Function**: Utilizes a custom `DiceFocalLoss` to effectively handle the severe class imbalance inherent in the BraTS dataset.
 - **Efficient Data Handling**: Features a highly optimized `Dataset` class with patient-level caching and a `PatientSampler` to minimize I/O bottlenecks during training.
-- **Reproducibility**: All hyperparameters and settings are centralized in `config/config.py` for easy modification and experimentation.
+- **Reproducibility**: All hyperparameters are centralized in `config/config.py` and can be overridden via command-line arguments.
 - **Comprehensive Evaluation**: Includes utilities for calculating standard segmentation metrics (Dice, IoU) and specialized BraTS metrics (HD95 for ET, TC, and WT regions).
 
 ## Quick Start
@@ -57,9 +57,7 @@ Download the BraTS 2020 training data and organize it as follows. The script wil
 └── MICCAI_BraTS2020_TrainingData/
     ├── BraTS20_Training_001/
     │   ├── BraTS20_Training_001_flair.nii.gz
-    │   ├── BraTS20_Training_001_t1.nii.gz
-    │   ├── BraTS20_Training_001_t1ce.nii.gz
-    │   ├── BraTS20_Training_001_t2.nii.gz
+    │   ├── ...
     │   └── BraTS20_Training_001_seg.nii.gz
     └── BraTS20_Training_002/
     └── ...
@@ -67,13 +65,11 @@ Download the BraTS 2020 training data and organize it as follows. The script wil
 
 ### 4. Training the Model
 
-The main training script uses `argparse` to allow for flexible configuration. Point the script to your dataset path to begin training.
+Point the main training script to your dataset path to begin.
 
 ```bash
 python train.py --data_path /path/to/your/data/MICCAI_BraTS2020_TrainingData
 ```
-
-Training progress, logs, and model checkpoints will be saved in the `/kaggle/working/` directory (or as configured in `config.py`).
 
 ## Architecture Overview
 
@@ -86,7 +82,7 @@ graph TD
     C --> D["ViT Encoder<br/>Global Context Modeling"]
 
     subgraph Decoder
-        E["U‑Net Style Decoder"]
+        E["U‑Net Style Decoder with<br/>Attention Gates"]
     end
 
     C -- Skip Connections --> E
@@ -95,32 +91,39 @@ graph TD
 
     style A fill:#f9f,stroke:#333,color:#000
     style B fill:#b9d,stroke:#333,color:#000
-    style C fill:#fff,stroke:#333,color:#000
     style D fill:#9cf,stroke:#333,color:#000
     style E fill:#cf9,stroke:#333,color:#000
     style F fill:#f99,stroke:#333,color:#000
+```
 
+## Technical Highlights
+
+### Key Components
+- **Hybrid Encoder**: An EfficientNet-B4 backbone, modified to accept 4-channel MRI input, extracts hierarchical features. The highest-level feature map is then fed into a ViT-Base model with dynamically interpolated positional embeddings to learn global relationships.
+- **Attention-based Decoder**: The decoder reconstructs the segmentation mask by fusing multi-scale features from the encoder's skip connections. Attention Gates are used to filter these skip connections, allowing the model to focus on the most relevant spatial information at each stage of upsampling.
+
+### Adaptive Class Weighting & Loss
+To combat extreme class imbalance, the model uses a sophisticated weighting scheme and a composite loss function.
+```python
+# The weighting strategy considers overall pixel frequency,
+# slice-level class presence, and boosts the weight of tumor borders.
+weights = compute_enhanced_class_weights(train_dataset)
+
+# The loss function combines Dice and Focal loss to balance
+# overlap-based and hard-example-mining objectives.
+criterion = DiceFocalLoss(class_weights=weights)
 ```
 
 ## Contributing
 We welcome contributions! Please feel free to open an issue to discuss proposed changes or submit a pull request.
 
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
-
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 ## Citation
-
-If you use this code in your research, please consider citing this repository:
-
+If you use this code in your research, please consider citing this repository.
 ```bibtex
-@misc{TransUNetBraTS2020,
+@misc{YourName2025TransUNetBraTS,
   author = {Your Name},
   title = {A Hybrid Transformer-CNN Architecture for Brain Tumor Segmentation},
   year = {2025},
