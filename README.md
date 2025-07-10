@@ -1,162 +1,131 @@
 # TransUNet for Brain Tumor Segmentation on BraTS 2020
 
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0--nightly+cu118-ee4c2c.svg)](https://pytorch.org/get-started/locally/#start-locally)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.1.2-ee4c2c.svg)](https://pytorch.org/get-started/locally/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project currently uses the PyTorch **nightly build (2.6.0+cu118)**. You can install it via:
-``````bash
-pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu118
-``````
-### Example of Brain Tumor Segmentation:
+This repository contains a PyTorch implementation of a **TransUNet-style hybrid vision transformer** for multi-class brain tumor segmentation on the BraTS 2020 dataset. The model leverages a CNN backbone for feature extraction and a transformer encoder for global context modeling, achieving a **0.825 Mean Dice Score** on the validation set.
 
-![TransUNet Segmentation Example](images/Segmentation_Output.png)  
+![TransUNet Segmentation Example](images/Segmentation_Output.png)
 
-State-of-the-art brain tumor segmentation using a hybrid Transformer-CNN architecture, achieving ** % Mean Dice Score** on BraTS 2020 validation data.
+## Performance
+
+The model achieves strong performance across all three tumor sub-regions, with particularly precise segmentation of the Tumor Core (TC).
+
+| Metric    | Enhancing Tumor (ET) | Tumor Core (TC) | Whole Tumor (WT) | **Average** |
+| :-------- | :------------------: | :-------------: | :--------------: | :---------: |
+| **Dice** |        0.8256        |   **0.8444** |      0.8053      |   0.8251    |
+| **IoU** |        0.7747        |   **0.8043** |      0.7458      |   0.7749    |
+| **HD95** |         6.22         |   **5.93** |       7.70       |   6.61      |
+
+- **Best Performing Region (Dice):** Tumor Core (TC) at **0.8444**
+- **Most Precise Boundaries (HD95):** Tumor Core (TC) at **5.93mm**
 
 ## Key Features
 
-- **Hybrid Architecture**: Combines EfficientNet-B4 CNN backbone with Vision Transformer (ViT)
-- **Advanced Training**:
-  - Mixed-precision training (FP16/FP32)
-  - Gradient accumulation & clipping
-  - Composite loss (Tversky-Focal + Boundary Loss)
-- **Medical Imaging Focus**:
-  - 4-channel MRI input (FLAIR, T1, T1CE, T2)
-  - Class-balanced weight computation
-  - Tumor border emphasis
-- **Reproducible Results**: Detailed configuration system with hyperparameters
-- **Visualization Tools**: Slice-by-slice predictions with modality comparison
-
-## Performance Highlights
-
-
-## Detailed BraTS Metrics
-
+- **Hybrid Architecture**: Combines a pre-trained **EfficientNet-B4** CNN backbone with a **Vision Transformer (ViT)** to capture both local and global dependencies.
+- **Advanced Training**: Implements mixed-precision training (FP16), gradient accumulation, gradient clipping, and a `CosineAnnealingWarmRestarts` learning rate scheduler.
+- **Robust Loss Function**: Utilizes a custom `DiceFocalLoss` to effectively handle the severe class imbalance inherent in the BraTS dataset.
+- **Efficient Data Handling**: Features a highly optimized `Dataset` class with patient-level caching and a `PatientSampler` to minimize I/O bottlenecks during training.
+- **Reproducibility**: All hyperparameters and settings are centralized in `config/config.py` for easy modification and experimentation.
+- **Comprehensive Evaluation**: Includes utilities for calculating standard segmentation metrics (Dice, IoU) and specialized BraTS metrics (HD95 for ET, TC, and WT regions).
 
 ## Quick Start
 
 ### 1. Prerequisites
 
-- Python 3.8+
-- NVIDIA GPU with CUDA 11.7+
-- BraTS 2020 Dataset ([Download](https://www.med.upenn.edu/cbica/brats2020/))
+- Python 3.9+
+- NVIDIA GPU with CUDA 11.8+ support
+- BraTS 2020 Training Dataset ([Request Access](https://www.med.upenn.edu/cbica/brats2020/registration.html))
 
 ### 2. Installation
 
 ```bash
-git clone https://github.com/yourusername/TransUNet_BraTs2020.git
+# Clone the repository
+git clone [https://github.com/yourusername/TransUNet_BraTs2020.git](https://github.com/yourusername/TransUNet_BraTs2020.git)
 cd TransUNet_BraTs2020
 
-# Create and activate environment
-conda env create -f environment.yml
-conda activate transunet
-
-# Install dependencies
-pip install -r requirements.txt
+# Create and activate a conda environment
+conda env create -f environment.yaml
+conda activate brats_segmentation
 ```
 
 ### 3. Dataset Setup
-Organize your BraTS 2020 data following this structure:
+Download the BraTS 2020 training data and organize it as follows. The script will automatically find the patient folders inside the `MICCAI_BraTS2020_TrainingData` directory.
+
 ```
-BraTS2020_TrainingData/
+/path/to/your/data/
 └── MICCAI_BraTS2020_TrainingData/
-├── BraTS20_Training_001/
-│ ├── BraTS20_Training_001_flair.nii
-│ ├── BraTS20_Training_001_t1.nii
-│ ├── BraTS20_Training_001_t1ce.nii
-│ ├── BraTS20_Training_001_t2.nii
-│ └── BraTS20_Training_001_seg.nii
-└── BraTS20_Training_002/
-└── ...
+    ├── BraTS20_Training_001/
+    │   ├── BraTS20_Training_001_flair.nii.gz
+    │   ├── BraTS20_Training_001_t1.nii.gz
+    │   ├── BraTS20_Training_001_t1ce.nii.gz
+    │   ├── BraTS20_Training_001_t2.nii.gz
+    │   └── BraTS20_Training_001_seg.nii.gz
+    └── BraTS20_Training_002/
+    └── ...
 ```
 
-### 4. Training
+### 4. Training the Model
+
+The main training script uses `argparse` to allow for flexible configuration. Point the script to your dataset path to begin training.
+
 ```bash
-$env:KMP_DUPLICATE_LIB_OK="TRUE"; python train.py
+python train.py --data_path /path/to/your/data/MICCAI_BraTS2020_TrainingData
 ```
-Configuration is managed through config/config.py:
 
-Adjust image size, batch size, learning rate
+Training progress, logs, and model checkpoints will be saved in the `/kaggle/working/` directory (or as configured in `config.py`).
 
-Modify loss function parameters
+## Architecture Overview
 
-Set mixed-precision training mode
-
-### 5. Evaluation
-```bash
-from utils.utils import evaluate_with_torchmetrics
-
-metrics = evaluate_with_torchmetrics(model, val_loader, device)
-print(f"BraTS Metrics - ET: {metrics['dice_et']:.4f} | TC: {metrics['dice_tc']:.4f} | WT: {metrics['dice_wt']:.4f}")
-```
-### 6. Architecture Overview
+The model fuses a CNN encoder with a Transformer to generate rich feature representations for a U-Net style decoder.
 
 ```mermaid
 graph TD
-    A[4-Channel MRI Input] --> B(EfficientNet-B4)
-    B --> C(Vision Transformer)
-    C --> D[Attention Decoder]
-    D --> E{{4-Class Output}}
-    style A fill:#f9f,stroke:#333,color:#000
-    style B fill:#b9d,stroke:#333,color:#000
-    style C fill:#9cf,stroke:#333,color:#000
-    style D fill:#cf9,stroke:#333,color:#000
-    style E fill:#f99,stroke:#333,color:#000
+    A["4‑Channel MRI Input<br/>(FLAIR, T1, T1CE, T2)"] --> B["CNN Backbone<br/>EfficientNet‑B4"]
+    B --> C{"High‑Level<br/>Feature Maps"}
+    C --> D["ViT Encoder<br/>Global Context Modeling"]
+
+    subgraph Decoder
+        E["U‑Net Style Decoder"]
+    end
+
+    C -- Skip Connections --> E
+    D -- Transformer Output --> E
+    E --> F["4‑Class Segmentation Mask<br/>(BG, Necrotic, Edema, Enhancing)"]
+
+    style A fill:#f9f,stroke:#333,color:#000
+    style B fill:#b9d,stroke:#333,color:#000
+    style C fill:#fff,stroke:#333,color:#000
+    style D fill:#9cf,stroke:#333,color:#000
+    style E fill:#cf9,stroke:#333,color:#000
+    style F fill:#f99,stroke:#333,color:#000
+
 ```
 
-### 7. Key Components:
-1) Hybrid Encoder
-   EfficientNet-B4 (modified for 4 input channels)
-   ViT-Base with adaptive positional embeddings
-2) Attention-based Decoder
-   Multi-scale feature fusion
-   Boundary-aware upsampling
-   Channel-wise attention gates
+## Contributing
+We welcome contributions! Please feel free to open an issue to discuss proposed changes or submit a pull request.
 
-### 8. Adaptive Class Weighting
+1.  Fork the repository.
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
-Adaptive Class Weighting
-```python
-def compute_class_weights(dataset):
-    # Combines pixel frequency, sample presence, and border emphasis
-    return balanced_weights
-```
+## License
 
-Composite Loss Function
-```python
-loss = α*(Tversky-Focal Loss) + (1-α)*(Boundary Loss)
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### 9. Visualization Tools
+## Citation
 
-View predictions with anatomical context:
-```python
-visualize_predictions(model, dataset, device, num_samples=4)
-```
+If you use this code in your research, please consider citing this repository:
 
-Sample output showing input modalities and segmentation:
-```
-FLAIR        T1          Ground Truth   Prediction
-[Image]     [Image]       [Mask]        [Pred Mask]
-```
-
-Contributing
-We welcome contributions! Please follow these steps:
-
-1) Open an issue to discuss proposed changes
-2) Fork the repository
-3) Create a feature branch (git checkout -b feature/improvement)
-4) Commit changes (git commit -m 'Add amazing feature')
-5) Push to branch (git push origin feature/improvement)
-6) Open a Pull Request
-
-Citation
 ```bibtex
 @misc{TransUNetBraTS2020,
   author = {Your Name},
-  title = {Brain Tumor Segmentation with Hybrid Transformer-CNN Architecture},
-  year = {2023},
+  title = {A Hybrid Transformer-CNN Architecture for Brain Tumor Segmentation},
+  year = {2025},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/yourusername/TransUNet_BraTs2020}}
+  howpublished = {\url{[https://github.com/yourusername/TransUNet_BraTs2020](https://github.com/yourusername/TransUNet_BraTs2020)}}
 }
-
+```
