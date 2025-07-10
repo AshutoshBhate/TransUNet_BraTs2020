@@ -1,42 +1,33 @@
-name: transunet
+name: brats_segmentation
 channels:
-  - conda-forge # MedPy is often available here
+  - pytorch
+  - nvidia
+  - conda-forge
   - defaults
 dependencies:
-  # Core Python & CUDA
-  - python=3.8
+  - python=3.10
   - pip
-  - cudatoolkit=11.8
-
-  # Numerical & Scientific
-  - numpy # Already a dependency for many others, but good to list
-  - scipy
-
-  # Image Processing & Medical Imaging
+  - pytorch=2.1.2
+  - torchvision=0.16.2
+  - torchaudio=2.1.2
+  - pytorch-cuda=11.8
+  - setuptools=65.5.1
   - nibabel
   - scikit-image
-  - pillow # PIL
-  - SimpleITK
-  - medpy # <-- Added MedPy
-
-  # ML/DL Core & Ecosystem (installed via pip below for specific versions/builds)
-
-  # Utilities
+  - simpleitk
+  - medpy
+  - einops
+  - scipy
   - tqdm
+  - pillow
   - psutil
   - humanize
+  - torchmetrics
+  - timm
+  - torchviz
   - matplotlib
-  - einops
-  - timm # Can be installed via conda, but pip section below might override
-
-  # Pip dependencies (for specific versions or CUDA builds)
+  - seaborn
+  - albumentations
+  - scikit-learn
   - pip:
-    - --extra-index-url https://download.pytorch.org/whl/cu118 # Using PyTorch index for CUDA build
-    - torch # Version will be determined by index and compatibility
-    - torchvision
-    - torchaudio
-    - torchviz
-    - torchmetrics
     - opencv-python-headless
-    - tensorboard # Often useful for logging
-    # Note: timm, einops etc. could also be listed here if specific pip versions are needed.
