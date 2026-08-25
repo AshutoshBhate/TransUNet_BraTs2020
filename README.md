@@ -11,11 +11,11 @@ This repository contains a PyTorch implementation of a **TransUNet-style hybrid 
 
 The model achieves strong performance across all three tumor sub-regions, with particularly precise segmentation of the Tumor Core (TC).
 
-| Metric    | Enhancing Tumor (ET) | Tumor Core (TC) | Whole Tumor (WT) | **Average** |
-| :-------- | :------------------: | :-------------: | :--------------: | :---------: |
-| **Dice** |        0.8256        |   **0.8444** |      0.8053      |   0.8251    |
-| **IoU** |        0.7747        |   **0.8043** |      0.7458      |   0.7749    |
-| **HD95** |         6.22         |   **5.93** |       7.70       |   6.61      |
+| Metric   | Enhancing Tumor (ET) | Tumor Core (TC) | Whole Tumor (WT) | **Average** |
+| :------- | :------------------: | :-------------: | :--------------: | :---------: |
+| **Dice** |        0.8256        |   **0.8444**    |      0.8053      |   0.8251    |
+| **IoU**  |        0.7747        |   **0.8043**    |      0.7458      |   0.7749    |
+| **HD95** |         6.22         |    **5.93**     |       7.70       |    6.61     |
 
 - **Best Performing Region (Dice):** Tumor Core (TC) at **0.8444**
 - **Most Precise Boundaries (HD95):** Tumor Core (TC) at **5.93mm**
@@ -50,6 +50,7 @@ conda activate brats_segmentation
 ```
 
 ### 3. Dataset Setup
+
 Download the BraTS 2020 training data and organize it as follows. The script will automatically find the patient folders inside the `MICCAI_BraTS2020_TrainingData` directory.
 
 ```
@@ -99,11 +100,14 @@ graph TD
 ## Technical Highlights
 
 ### Key Components
+
 - **Hybrid Encoder**: An EfficientNet-B4 backbone, modified to accept 4-channel MRI input, extracts hierarchical features. The highest-level feature map is then fed into a ViT-Base model with dynamically interpolated positional embeddings to learn global relationships.
 - **Attention-based Decoder**: The decoder reconstructs the segmentation mask by fusing multi-scale features from the encoder's skip connections. Attention Gates are used to filter these skip connections, allowing the model to focus on the most relevant spatial information at each stage of upsampling.
 
 ### Adaptive Class Weighting & Loss
+
 To combat extreme class imbalance, the model uses a sophisticated weighting scheme and a composite loss function.
+
 ```python
 # The weighting strategy considers overall pixel frequency,
 # slice-level class presence, and boosts the weight of tumor borders.
@@ -114,14 +118,14 @@ weights = compute_enhanced_class_weights(train_dataset)
 criterion = DiceFocalLoss(class_weights=weights)
 ```
 
-## Contributing
-We welcome contributions! Please feel free to open an issue to discuss proposed changes or submit a pull request.
-
 ## License
+
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 ## Citation
+
 If you use this code in your research, please consider citing this repository.
+
 ```bibtex
 @misc{YourName2025TransUNetBraTS,
   author = {Your Name},
