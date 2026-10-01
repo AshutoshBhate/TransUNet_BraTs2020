@@ -41,7 +41,7 @@ The model achieves strong performance across all three tumor sub-regions, with p
 
 ```bash
 # Clone the repository
-git clone [https://github.com/yourusername/TransUNet_BraTs2020.git](https://github.com/yourusername/TransUNet_BraTs2020.git)
+git clone https://github.com/AshutoshBhate/TransUNet_BraTs2020.git
 cd TransUNet_BraTs2020
 
 # Create and activate a conda environment
@@ -122,17 +122,10 @@ criterion = DiceFocalLoss(class_weights=weights)
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-## Citation
+## Paper
 
-If you use this code in your research, please consider citing this repository.
+The method and results are described in:
 
-```bibtex
-@misc{YourName2025TransUNetBraTS,
-  author = {Your Name},
-  title = {A Hybrid Transformer-CNN Architecture for Brain Tumor Segmentation},
-  year = {2025},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{[https://github.com/yourusername/TransUNet_BraTs2020](https://github.com/yourusername/TransUNet_BraTs2020)}}
-}
-```
+> Ashutosh Bhate and Mousami Turuk, "Optimized 2D Hybrid CNN-Transformer Architecture for Multi-Modal Brain Tumor Segmentation," accepted at ICTCS 2026.
+
+If you use this code in your research, please cite the paper.
