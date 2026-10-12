@@ -371,8 +371,7 @@ class TransUNet(nn.Module):
         make_dot(pred.mean(), params=dict(self.named_parameters())).render("grad_graph", format="png")
         
     def get_gradient_norms(self):
-        """Return gradient L2 norms for monitoring"""
+        """Return the mean absolute gradients recorded by the encoder's backward hooks"""
         return {
-            'encoder': self.encoder.grad_norms,
-            'decoder': self.decoder.grad_norms
+            'encoder': self.encoder.grad_norms
         }

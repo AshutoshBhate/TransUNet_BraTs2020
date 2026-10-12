@@ -20,20 +20,28 @@ The model achieves strong performance across all three tumor sub-regions, with p
 - **Best Performing Region (Dice):** Tumor Core (TC) at **0.8444**
 - **Most Precise Boundaries (HD95):** Tumor Core (TC) at **5.93mm**
 
+### How these numbers were measured
+
+- BraTS 2020 training set, split 90/10 by patient: 330 patients for training and 38 for validation, listed in `splits/validation_patients.txt`.
+- Validation used every slice with tumor plus a random 25% of the tumor-free slices of those 38 patients (3,333 slices).
+- Training ran 71 epochs with early stopping. The best checkpoint (epoch 56) was chosen on the same 38 patients; there is no separate test set.
+- Dice and IoU are computed per 2D slice and averaged. A slice where the prediction and the ground truth are both empty counts as 1.0. HD95 is averaged over slices where both contain the region.
+- These are internal validation numbers, so they aren't comparable to the official BraTS leaderboard, which scores whole 3D volumes.
+
 ## Key Features
 
 - **Hybrid Architecture**: Combines a pre-trained **EfficientNet-B4** CNN backbone with a **Vision Transformer (ViT)** to capture both local and global dependencies.
 - **Advanced Training**: Implements mixed-precision training (FP16), gradient accumulation, gradient clipping, and a `CosineAnnealingWarmRestarts` learning rate scheduler.
 - **Robust Loss Function**: Utilizes a custom `DiceFocalLoss` to effectively handle the severe class imbalance inherent in the BraTS dataset.
 - **Efficient Data Handling**: Features a highly optimized `Dataset` class with patient-level caching and a `PatientSampler` to minimize I/O bottlenecks during training.
-- **Reproducibility**: All hyperparameters are centralized in `config/config.py` and can be overridden via command-line arguments.
+- **Reproducibility**: All hyperparameters are centralized in `config/config.py` and can be overridden via command-line arguments. The validation patients are fixed in `splits/validation_patients.txt`.
 - **Comprehensive Evaluation**: Includes utilities for calculating standard segmentation metrics (Dice, IoU) and specialized BraTS metrics (HD95 for ET, TC, and WT regions).
 
 ## Quick Start
 
 ### 1. Prerequisites
 
-- Python 3.9+
+- Python 3.10 (3.9 to 3.11 also work; PyTorch 2.1.2 has no builds for 3.12 or newer)
 - NVIDIA GPU with CUDA 11.8+ support
 - BraTS 2020 Training Dataset ([Request Access](https://www.med.upenn.edu/cbica/brats2020/registration.html))
 
@@ -109,8 +117,8 @@ graph TD
 To combat extreme class imbalance, the model uses a sophisticated weighting scheme and a composite loss function.
 
 ```python
-# The weighting strategy considers overall pixel frequency,
-# slice-level class presence, and boosts the weight of tumor borders.
+# Each class gets one weight from its overall pixel frequency, how many slices
+# it appears in, and a border factor: 1.5 × (its pixels ÷ its border pixels).
 weights = compute_enhanced_class_weights(train_dataset)
 
 # The loss function combines Dice and Focal loss to balance

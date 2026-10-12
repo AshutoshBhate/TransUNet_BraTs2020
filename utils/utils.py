@@ -67,7 +67,7 @@ def compute_enhanced_class_weights(
         dataset (BrainMRIDataset_Optimized): The training dataset instance.
         num_classes (int): The number of classes.
         epsilon (float): A small value to avoid division by zero.
-        border_boost_factor (float): A factor to boost the weight of border pixels.
+        border_boost_factor (float): Each tumor class's weight is multiplied by this times its pixel count divided by its border pixel count.
 
     Returns:
         torch.Tensor: A tensor of computed class weights.
@@ -239,8 +239,8 @@ def compute_brats_hd95(model, loader, device, spacing=(1.0, 1.0), precision='fp1
                         hd95_lists[region].append(np.inf)
                     elif not has_true and has_pred:
                         # False Positive: Prediction exists, but ground truth is empty
-                        # BraTS evaluation often ignores HD95 here, but appending inf penalizes FPs strongly.
-                        # Let's append inf for consistency in penalizing mismatches.
+                        # Mark the mismatch with inf. The averaging below turns inf into NaN and skips it,
+                        # so misses and false alarms are left out of HD95 (they still lower Dice).
                         hd95_lists[region].append(np.inf)
                     # else: # not has_true and not has_pred
                         # True Negative: Both are empty. HD95 is not defined/calculated. Do nothing.
@@ -345,3 +345,109 @@ def visualize_predictions(model, dataset, device, num_samples=10):
     fig.legend(handles=legend_elements, loc='lower right', ncol=4)
     plt.tight_layout()
     plt.show()
+
+
+def compute_brats_metrics(pred_mask, target, spacing=(1.0, 1.0)):
+    metrics = {}
+    regions = {
+        'et': (3, 3),
+        'tc': ([1, 3], [1, 3]),
+        'wt': ([1, 2, 3], [1, 2, 3])
+    }
+
+    for region, (pred_labels, true_labels) in regions.items():
+        pred_bin = torch.isin(pred_mask, torch.tensor(pred_labels, device=pred_mask.device))
+        true_bin = torch.isin(target, torch.tensor(true_labels, device=target.device))
+        
+        pred_np = pred_bin.cpu().numpy()
+        true_np = true_bin.cpu().numpy()
+
+        intersection = torch.logical_and(pred_bin, true_bin).sum().float()
+        union = torch.logical_or(pred_bin, true_bin).sum().float()
+        sum_ = pred_bin.sum() + true_bin.sum()
+
+        if sum_ == 0:
+            dice = torch.tensor(1.0)
+            iou = torch.tensor(1.0)
+        elif sum_ == 0 or union == 0:
+            dice = torch.tensor(0.0)
+            iou = torch.tensor(0.0)
+        else:
+            dice = (2 * intersection) / sum_
+            iou = intersection / union
+
+        hd95 = np.nan
+        hd = np.nan
+        has_pred = np.any(pred_np)
+        has_true = np.any(true_np)
+
+        if has_pred or has_true:
+            if not has_pred or not has_true:
+                hd95 = np.inf
+                hd = np.inf
+            else:
+                try:
+                    hd95 = medpy_metric.hd95(pred_np, true_np, voxelspacing=spacing)
+                    hd = medpy_metric.hd(pred_np, true_np, voxelspacing=spacing)
+                except RuntimeError:
+                    pass
+
+        metrics.update({
+            f'dice_{region}': dice.item(),
+            f'iou_{region}': iou.item(),
+            f'hd95_{region}': hd95,
+            f'hd_{region}': hd
+        })
+
+    return metrics
+
+def evaluate_with_torchmetrics(model, loader, device, spacing=(1.0, 1.0)):
+    model.eval()
+    metrics = {
+        **{f'dice_{r}': 0.0 for r in ['et', 'tc', 'wt']},
+        **{f'iou_{r}': 0.0 for r in ['et', 'tc', 'wt']},
+        **{f'hd95_{r}': 0.0 for r in ['et', 'tc', 'wt']},
+        **{f'hd_{r}': 0.0 for r in ['et', 'tc', 'wt']},
+        'counts': {'et': 0, 'tc': 0, 'wt': 0, 'total': 0}
+    }
+    
+    with torch.no_grad():
+        for x, y in tqdm(loader, desc="Full Evaluation"):
+            x, y = x.to(device), y.to(device)
+            pred = model(x)
+            pred_masks = pred.argmax(dim=1)
+            
+            for i in range(x.size(0)):
+                sample_metrics = compute_brats_metrics(pred_masks[i], y[i], spacing)
+                
+                for region in ['et', 'tc', 'wt']:
+                    metrics[f'dice_{region}'] += sample_metrics[f'dice_{region}']
+                    metrics[f'iou_{region}'] += sample_metrics[f'iou_{region}']
+                    
+                    hd95_val = sample_metrics[f'hd95_{region}']
+                    hd_val = sample_metrics[f'hd_{region}']
+
+                    if np.isfinite(hd95_val):
+                        metrics[f'hd95_{region}'] += hd95_val
+                        metrics[f'hd_{region}'] += hd_val
+                        metrics['counts'][region] += 1
+                
+                metrics['counts']['total'] += 1
+
+    for region in ['et', 'tc', 'wt']:
+        metrics[f'dice_{region}'] /= metrics['counts']['total']
+        metrics[f'iou_{region}'] /= metrics['counts']['total']
+        
+        if metrics['counts'][region] > 0:
+            metrics[f'hd95_{region}'] /= metrics['counts'][region]
+            metrics[f'hd_{region}'] /= metrics['counts'][region]
+        else:
+            metrics[f'hd95_{region}'] = np.nan
+            metrics[f'hd_{region}'] = np.nan
+    
+    metrics['avg_dice'] = np.nanmean([metrics['dice_et'], metrics['dice_tc'], metrics['dice_wt']])
+    metrics['avg_iou'] = np.nanmean([metrics['iou_et'], metrics['iou_tc'], metrics['iou_wt']])
+    metrics['avg_hd95'] = np.nanmean([metrics['hd95_et'], metrics['hd95_tc'], metrics['hd95_wt']])
+    metrics['avg_hd'] = np.nanmean([metrics['hd_et'], metrics['hd_tc'], metrics['hd_wt']])
+    
+    return metrics

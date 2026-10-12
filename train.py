@@ -11,7 +11,6 @@ This script orchestrates the entire training and evaluation process. It handles:
 """
 
 import os
-from sklearn.model_selection import train_test_split
 import argparse
 
 import numpy as np
@@ -301,9 +300,10 @@ if __name__ == "__main__":
     print(f"Found {len(all_patients)} patient folders in {data_root}")
 
     # do a 90/10 patient‐level split
-    train_ids, val_ids = train_test_split(
-        all_patients, test_size=0.1, random_state=42
-    )
+    split_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "splits", "validation_patients.txt")
+    with open(split_file) as handle:
+        val_ids = [line.strip() for line in handle if line.strip()]
+    train_ids = [patient for patient in all_patients if patient not in val_ids]
 
     train_augs = get_train_transforms(cfg['img_size'])
 
